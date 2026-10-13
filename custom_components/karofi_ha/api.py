@@ -59,19 +59,22 @@ class KarofiApi:
     async def login(self) -> dict[str, Any]:
         """Đăng nhập, lưu token. Trả `data` của signin."""
         async with self._login_lock:
-            body = await self._raw(
-                "POST",
-                "app/user/signin",
-                json={
-                    # App gửi SĐT ở `phone` khi quốc gia là VN, `email` để rỗng
-                    # (LoginBloc.login → AppStringExtension.isIsoVNCode).
-                    "email": "",
-                    "phone": self._phone,
-                    "password": self._password,
-                    "country": COUNTRY_VN,
-                },
-                auth=False,
-            )
+            try:
+                body = await self._raw(
+                    "POST",
+                    "app/user/signin",
+                    json={
+                        # App gửi SĐT ở `phone` khi quốc gia là VN, `email` để rỗng
+                        # (LoginBloc.login → AppStringExtension.isIsoVNCode).
+                        "email": "",
+                        "phone": self._phone,
+                        "password": self._password,
+                        "country": COUNTRY_VN,
+                    },
+                    auth=False,
+                )
+            except _Unauthorized as err:
+                raise KarofiAuthError("đăng nhập bị từ chối (401)") from err
             data = body.get("data") if isinstance(body, dict) else None
             if not isinstance(data, dict) or not data.get("token"):
                 raise KarofiAuthError(_message(body) or "đăng nhập thất bại")

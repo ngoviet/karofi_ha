@@ -42,6 +42,25 @@ async def test_wrong_password_is_auth_error(hass: HomeAssistant, aioclient_mock)
         await api.login()
 
 
+@pytest.mark.parametrize(
+    "response",
+    [
+        {
+            "status": 401,
+            "json": {"error": {"code": 401, "message": "Chưa xác thực", "data": None}},
+        },
+        {"json": {"error": {"code": 401, "message": "Chưa xác thực", "data": None}}},
+    ],
+)
+async def test_signin_401_is_auth_error(hass: HomeAssistant, aioclient_mock, response):
+    aioclient_mock.post(API + "app/user/signin", **response)
+    api = KarofiApi(async_get_clientsession(hass), PHONE, "pw")
+    with pytest.raises(KarofiAuthError):
+        await api.login()
+    with pytest.raises(KarofiAuthError):
+        await api.get_device_detail(SERIAL)
+
+
 async def test_401_relogins_once(hass: HomeAssistant, aioclient_mock):
     aioclient_mock.post(API + "app/user/signin", json=SIGNIN_OK)
     aioclient_mock.get(
