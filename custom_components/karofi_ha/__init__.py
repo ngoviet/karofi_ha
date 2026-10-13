@@ -1,4 +1,5 @@
 """Karofi 365 — máy lọc nước Karofi qua cloud app Karofi 365 (Phase 1: chỉ đọc)."""
+
 from __future__ import annotations
 
 import logging
@@ -48,7 +49,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: KarofiConfigEntry) -> bo
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
-    _LOGGER.info("Karofi 365 ready: %d máy lọc %s", len(coordinator.data), list(coordinator.data))
+    _LOGGER.info(
+        "Karofi 365 ready: %d máy lọc %s", len(coordinator.data), list(coordinator.data)
+    )
     return True
 
 

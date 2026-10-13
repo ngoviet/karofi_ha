@@ -3,6 +3,7 @@
 Mọi giá trị dưới đây lấy từ decompile app Karofi 365 v2.2.98 (Flutter, Dart 2.19.6,
 blutter) và đã đối chiếu trên tài khoản thật 2026-10-13 — xem docs/api-notes.md.
 """
+
 from __future__ import annotations
 
 DOMAIN = "karofi_ha"
@@ -40,12 +41,12 @@ CORE_WARN_PUMP_HOURS = 50
 # Mã lỗi `iro_errs` → key enum (dịch trong strings.json). Nguồn: bảng `ranges` của
 # Devices_Type từ server + _getNotifyMessageFromError (mã 3 chỉ có trong app).
 ERROR_CODES: dict[int, str] = {
-    1: "pump_overrun",      # Bơm hoạt động quá 5 tiếng
-    2: "inlet_weak",        # Nước cấp đầu vào yếu
-    3: "tank_empty",        # Cạn nước bình chứa
-    4: "no_water_inlet",    # Không có nước đầu vào
-    5: "leak",              # Máy bị rò rỉ nước
-    100: "high_tds",        # TDS cao
+    1: "pump_overrun",  # Bơm hoạt động quá 5 tiếng
+    2: "inlet_weak",  # Nước cấp đầu vào yếu
+    3: "tank_empty",  # Cạn nước bình chứa
+    4: "no_water_inlet",  # Không có nước đầu vào
+    5: "leak",  # Máy bị rò rỉ nước
+    100: "high_tds",  # TDS cao
 }
 ERROR_NONE = "normal"
 ERROR_UNKNOWN = "unknown_error"

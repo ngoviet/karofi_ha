@@ -3,6 +3,7 @@
 Cần file `.env` (gitignored) ở gốc repo với HA_HOST, HA_USER, HA_PASS — xem `.env.example`.
 Dùng: python tools/deploy.py   (sau đó restart HA)
 """
+
 import base64
 from pathlib import Path
 
@@ -20,7 +21,9 @@ env = dict(
 )
 ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-ssh.connect(env["HA_HOST"], username=env["HA_USER"], password=env["HA_PASS"], timeout=10)
+ssh.connect(
+    env["HA_HOST"], username=env["HA_USER"], password=env["HA_PASS"], timeout=10
+)
 
 
 def run(cmd: str) -> str:

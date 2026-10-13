@@ -35,6 +35,9 @@ Tuỳ chọn: chu kỳ cập nhật (mặc định 60 s, 30–900 s).
 | Lõi N cần thay (problem) | còn < 15 ngày **hoặc** < 50 giờ bơm | Đúng ngưỡng cảnh báo của app |
 | Kết nối · Tín hiệu Wi-Fi | `status`, `rssi` | Chẩn đoán |
 
+> `iro_errs` rỗng hoặc thiếu = máy chưa báo → Trạng thái, Cảnh báo và Rò rỉ là `unknown`
+> (không phải "Hoạt động ổn định"/tắt). Mảng rỗng thật (`[]`) hoặc toàn `"0"` vẫn là bình thường.
+
 ## Phát triển
 
 ```bash

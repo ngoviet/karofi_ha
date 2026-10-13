@@ -1,4 +1,5 @@
 """Entity gốc: 1 máy lọc = 1 device."""
+
 from __future__ import annotations
 
 from homeassistant.helpers.device_registry import DeviceInfo
@@ -26,7 +27,9 @@ class KarofiEntity(CoordinatorEntity[KarofiCoordinator]):
             serial_number=serial,
             sw_version=dev.firmware,
             hw_version=dev.hardware,
-            suggested_area=dev.room if dev.room and "chưa gán" not in dev.room.lower() else None,
+            suggested_area=dev.room
+            if dev.room and "chưa gán" not in dev.room.lower()
+            else None,
         )
 
     @property

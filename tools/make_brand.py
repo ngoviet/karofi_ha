@@ -5,6 +5,7 @@ Thiết kế: nền gradient xanh nước bo góc + giọt nước trắng.
 
 Dùng: python tools/make_brand.py
 """
+
 from __future__ import annotations
 
 import pathlib
@@ -14,9 +15,14 @@ import zlib
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-OUT = pathlib.Path(__file__).resolve().parent.parent / "custom_components" / "karofi_ha" / "brand"
-TOP = (0, 105, 160)      # #0069A0
-BOTTOM = (0, 188, 212)   # #00BCD4
+OUT = (
+    pathlib.Path(__file__).resolve().parent.parent
+    / "custom_components"
+    / "karofi_ha"
+    / "brand"
+)
+TOP = (0, 105, 160)  # #0069A0
+BOTTOM = (0, 188, 212)  # #00BCD4
 # Giọt nước = đường tròn đáy + tam giác nhọn phía trên (2 cạnh tiếp tuyến đường tròn)
 DROP_C, DROP_R, DROP_TIP = (0.5, 0.60), 0.24, (0.5, 0.13)
 
@@ -48,7 +54,9 @@ def render(size: int) -> bytes:
                 if dx * dx + dy * dy > radius * radius:
                     px.extend((0, 0, 0, 0))
                     continue
-            px.extend((255, 255, 255, 255) if inside_drop(x / size, y / size) else (*bg, 255))
+            px.extend(
+                (255, 255, 255, 255) if inside_drop(x / size, y / size) else (*bg, 255)
+            )
     return bytes(px)
 
 
@@ -56,13 +64,19 @@ def write_png(path: pathlib.Path, size: int) -> None:
     raw = render(size)
 
     def chunk(tag: bytes, data: bytes) -> bytes:
-        return (struct.pack(">I", len(data)) + tag + data
-                + struct.pack(">I", zlib.crc32(tag + data) & 0xFFFFFFFF))
+        return (
+            struct.pack(">I", len(data))
+            + tag
+            + data
+            + struct.pack(">I", zlib.crc32(tag + data) & 0xFFFFFFFF)
+        )
 
-    path.write_bytes(b"\x89PNG\r\n\x1a\n"
-                     + chunk(b"IHDR", struct.pack(">IIBBBBB", size, size, 8, 6, 0, 0, 0))
-                     + chunk(b"IDAT", zlib.compress(raw, 9))
-                     + chunk(b"IEND", b""))
+    path.write_bytes(
+        b"\x89PNG\r\n\x1a\n"
+        + chunk(b"IHDR", struct.pack(">IIBBBBB", size, size, 8, 6, 0, 0, 0))
+        + chunk(b"IDAT", zlib.compress(raw, 9))
+        + chunk(b"IEND", b"")
+    )
     print(f"  {path.name:14} {size}x{size}  {path.stat().st_size:,} bytes")
 
 

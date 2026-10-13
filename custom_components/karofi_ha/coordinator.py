@@ -1,4 +1,5 @@
 """DataUpdateCoordinator cho Karofi 365."""
+
 from __future__ import annotations
 
 import logging
@@ -52,7 +53,9 @@ class KarofiCoordinator(TimestampDataUpdateCoordinator[dict[str, KarofiDevice]])
             dev["seriNumber"]: (dev, house, room)
             for house, room, dev in iter_house_devices(payload)
         }
-        _LOGGER.debug("karofi: tìm thấy %d thiết bị: %s", len(self._known), list(self._known))
+        _LOGGER.debug(
+            "karofi: tìm thấy %d thiết bị: %s", len(self._known), list(self._known)
+        )
 
     async def _async_update_data(self) -> dict[str, KarofiDevice]:
         try:

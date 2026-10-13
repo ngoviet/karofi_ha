@@ -1,4 +1,5 @@
 """Sensor cho máy lọc Karofi: TDS, chất lượng nước, trạng thái lỗi, lõi lọc."""
+
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -121,7 +122,9 @@ class KarofiSensor(KarofiEntity, SensorEntity):
 class _CoreSensor(KarofiEntity, SensorEntity):
     _kind = ""
 
-    def __init__(self, coordinator: KarofiCoordinator, serial: str, position: int) -> None:
+    def __init__(
+        self, coordinator: KarofiCoordinator, serial: str, position: int
+    ) -> None:
         super().__init__(coordinator, serial, f"core_{position}_{self._kind}")
         self._position = position
         self._attr_translation_key = f"core_{self._kind}"

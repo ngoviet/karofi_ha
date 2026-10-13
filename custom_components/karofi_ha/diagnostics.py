@@ -1,4 +1,5 @@
 """Diagnostics: property thô + lõi lọc đã phân tích (che SĐT/mật khẩu/serial)."""
+
 from __future__ import annotations
 
 from dataclasses import asdict

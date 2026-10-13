@@ -1,4 +1,5 @@
 """Config flow (đăng nhập tài khoản Karofi 365) + reauth + options."""
+
 from __future__ import annotations
 
 import logging
@@ -6,7 +7,12 @@ from collections.abc import Mapping
 from typing import Any
 
 import voluptuous as vol
-from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResult, OptionsFlow
+from homeassistant.config_entries import (
+    ConfigEntry,
+    ConfigFlow,
+    ConfigFlowResult,
+    OptionsFlow,
+)
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
@@ -25,7 +31,9 @@ from .models import iter_house_devices
 _LOGGER = logging.getLogger(__name__)
 
 
-async def _validate(hass: HomeAssistant, phone: str, password: str) -> tuple[str | None, dict]:
+async def _validate(
+    hass: HomeAssistant, phone: str, password: str
+) -> tuple[str | None, dict]:
     """Đăng nhập thử. Trả (error_key, info) — info có user_id, devices."""
     api = KarofiApi(async_get_clientsession(hass), phone, password)
     try:
@@ -35,7 +43,7 @@ async def _validate(hass: HomeAssistant, phone: str, password: str) -> tuple[str
         return "invalid_auth", {}
     except KarofiApiError:
         return "cannot_connect", {}
-    except Exception:  # noqa: BLE001
+    except Exception:
         _LOGGER.exception("karofi: lỗi không xác định khi đăng nhập")
         return "unknown", {}
     devices = [dev.get("seriNumber") for _h, _r, dev in iter_house_devices(houses)]
@@ -49,7 +57,9 @@ def _mask(phone: str) -> str:
 class KarofiConfigFlow(ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
-    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+    async def async_step_user(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         errors: dict[str, str] = {}
         if user_input is not None:
             phone = user_input[CONF_PHONE].strip().replace(" ", "")
@@ -73,7 +83,9 @@ class KarofiConfigFlow(ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
-    async def async_step_reauth(self, entry_data: Mapping[str, Any]) -> ConfigFlowResult:
+    async def async_step_reauth(
+        self, entry_data: Mapping[str, Any]
+    ) -> ConfigFlowResult:
         return await self.async_step_reauth_confirm()
 
     async def async_step_reauth_confirm(
@@ -103,16 +115,21 @@ class KarofiConfigFlow(ConfigFlow, domain=DOMAIN):
 
 
 class KarofiOptionsFlow(OptionsFlow):
-    async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         if user_input is not None:
             return self.async_create_entry(data=user_input)
-        current = self.config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
+        current = self.config_entry.options.get(
+            CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
+        )
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema(
                 {
                     vol.Required(CONF_SCAN_INTERVAL, default=current): vol.All(
-                        vol.Coerce(int), vol.Range(min=MIN_SCAN_INTERVAL, max=MAX_SCAN_INTERVAL)
+                        vol.Coerce(int),
+                        vol.Range(min=MIN_SCAN_INTERVAL, max=MAX_SCAN_INTERVAL),
                     )
                 }
             ),

@@ -15,6 +15,7 @@ HydrogenWaterPurifierBloc._getCoreInfoOnline(lTime, names, rtr, rtt, listHSD: hs
     iro_rtt   tổng giờ chạy bơm cho phép của lõi
     iro_rtr   giờ chạy bơm CÒN LẠI                  app cảnh báo khi < 50
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field

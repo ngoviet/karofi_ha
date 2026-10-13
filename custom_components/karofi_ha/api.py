@@ -14,6 +14,7 @@ Lỗi có HAI dạng (đo thật):
     HTTP 200 {"code": 400, "message": "Account not registered", "data": []}
     HTTP 500 {"error": {"code": 500, "message": "...", "data": "ValidationError: ..."}}
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -44,7 +45,9 @@ class KarofiAuthError(KarofiApiError):
 class KarofiApi:
     """Gọi REST API Karofi 365 bằng tài khoản app."""
 
-    def __init__(self, session: aiohttp.ClientSession, phone: str, password: str) -> None:
+    def __init__(
+        self, session: aiohttp.ClientSession, phone: str, password: str
+    ) -> None:
         self._session = session
         self._phone = phone.strip()
         self._password = password

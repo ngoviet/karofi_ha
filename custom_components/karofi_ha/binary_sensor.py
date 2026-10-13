@@ -1,4 +1,5 @@
 """Binary sensor cho máy lọc Karofi: kết nối, nước vào, bơm, bình đầy, lỗi, lõi cần thay."""
+
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -78,7 +79,9 @@ async def async_setup_entry(
                 continue
             added.add(serial)
             entities.append(KarofiOnlineSensor(coordinator, serial))
-            entities += [KarofiBinarySensor(coordinator, serial, d) for d in BINARY_SENSORS]
+            entities += [
+                KarofiBinarySensor(coordinator, serial, d) for d in BINARY_SENSORS
+            ]
             entities += [
                 KarofiCoreReplaceSensor(coordinator, serial, core.position)
                 for core in dev.cores
@@ -131,7 +134,9 @@ class KarofiCoreReplaceSensor(KarofiEntity, BinarySensorEntity):
     _attr_translation_key = "core_replace"
     _attr_device_class = BinarySensorDeviceClass.PROBLEM
 
-    def __init__(self, coordinator: KarofiCoordinator, serial: str, position: int) -> None:
+    def __init__(
+        self, coordinator: KarofiCoordinator, serial: str, position: int
+    ) -> None:
         super().__init__(coordinator, serial, f"core_{position}_replace")
         self._position = position
         self._attr_translation_placeholders = {"position": str(position)}
