@@ -69,7 +69,8 @@ class KarofiCoordinator(TimestampDataUpdateCoordinator[dict[str, KarofiDevice]])
                     raise
                 except KarofiApiError as err:
                     # 1 máy lỗi không làm hỏng cả account: giữ số liệu lần trước
-                    # của máy đó (nếu có) — entity vẫn sống, máy khác vẫn cập nhật.
+                    # của máy đó (nếu có); máy chưa có số liệu cũ thì bỏ qua lần
+                    # này và tự xuất hiện lại khi API hết lỗi. Máy khác vẫn cập nhật.
                     _LOGGER.debug("karofi: detail %s lỗi: %s", serial, err)
                     last_error = err
                     if self.data and serial in self.data:
@@ -77,8 +78,8 @@ class KarofiCoordinator(TimestampDataUpdateCoordinator[dict[str, KarofiDevice]])
                     continue
                 devices[serial] = parse_device(detail, house, room)
                 fresh += 1
-            if last_error is not None and (fresh == 0 or len(devices) < len(self._known)):
-                # Không máy nào có số liệu mới, hoặc có máy không có cả số liệu cũ
+            if last_error is not None and fresh == 0:
+                # Không máy nào có số liệu mới
                 raise last_error
         except KarofiAuthError as err:
             self.failed_updates += 1

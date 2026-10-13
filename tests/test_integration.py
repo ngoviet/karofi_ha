@@ -141,6 +141,39 @@ async def test_setup_creates_entities(hass: HomeAssistant, cloud):
     assert await hass.config_entries.async_unload(entry.entry_id)
 
 
+async def test_one_device_detail_error_does_not_fail_account(
+    hass: HomeAssistant, aioclient_mock
+):
+    from homeassistant.helpers import entity_registry as er
+
+    serial2 = "41A00000002"
+    aioclient_mock.post(API + "app/user/signin", json=SIGNIN_OK)
+    aioclient_mock.get(API + "app/house/houseInformation", json=houses_payload(SERIAL, serial2))
+    aioclient_mock.get(API + f"app/device/detail/{SERIAL}", json=detail_payload())
+    aioclient_mock.get(
+        API + f"app/device/detail/{serial2}",
+        status=500,
+        json={"error": {"code": 500, "message": "Lỗi xảy ra với Server", "data": None}},
+    )
+    entry = await _setup(hass)
+    assert entry.state is ConfigEntryState.LOADED
+    assert _state(hass, "sensor", "tds").state == "3"
+    registry = er.async_get(hass)
+    assert registry.async_get_entity_id("sensor", DOMAIN, f"{serial2}_tds") is None
+    assert await hass.config_entries.async_unload(entry.entry_id)
+
+
+async def test_blank_error_codes_reports_unknown(hass: HomeAssistant, aioclient_mock):
+    aioclient_mock.post(API + "app/user/signin", json=SIGNIN_OK)
+    aioclient_mock.get(API + "app/house/houseInformation", json=houses_payload())
+    aioclient_mock.get(API + f"app/device/detail/{SERIAL}", json=detail_payload(iro_errs=""))
+    entry = await _setup(hass)
+    assert _state(hass, "sensor", "status").state == "unknown"
+    assert _state(hass, "binary_sensor", "problem").state == "unknown"
+    assert _state(hass, "binary_sensor", "leak").state == "unknown"
+    assert await hass.config_entries.async_unload(entry.entry_id)
+
+
 async def test_offline_device_keeps_connectivity_available(hass: HomeAssistant, aioclient_mock):
     payload = detail_payload()
     payload["data"]["status"] = 0

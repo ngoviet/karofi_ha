@@ -69,6 +69,17 @@ def test_quality_thresholds_and_errors():
     assert parse_device(detail_payload(iro_errs=["0"])["data"]).status == "normal"
 
 
+def test_blank_error_codes_are_unknown():
+    assert parse_device(detail_payload(iro_errs="")["data"]).error_codes is None
+    assert parse_device(detail_payload(iro_errs="")["data"]).status is None
+    payload = detail_payload()["data"]
+    payload["properties"] = [p for p in payload["properties"] if p["code"] != "iro_errs"]
+    dev = parse_device(payload)
+    assert dev.error_codes is None
+    assert dev.errors is None
+    assert dev.status is None
+
+
 def test_tank_flag_is_inverted():
     # Server: 0 = "Đầy bình", 1 = "Chưa đầy"
     assert parse_device(detail_payload(iro_ketn="0")["data"]).tank_full is True

@@ -187,18 +187,26 @@ class KarofiDevice:
         return _flag(self.prop("iro_vx"))
 
     @property
-    def error_codes(self) -> list[int]:
-        codes = [_as_int(v) for v in _as_list(self.prop("iro_errs"))]
+    def error_codes(self) -> list[int] | None:
+        raw = self.prop("iro_errs")
+        if raw is None:
+            return None
+        codes = [_as_int(v) for v in _as_list(raw)]
         return sorted({c for c in codes if c})
 
     @property
-    def errors(self) -> list[str]:
-        return [ERROR_CODES.get(c, ERROR_UNKNOWN) for c in self.error_codes]
+    def errors(self) -> list[str] | None:
+        codes = self.error_codes
+        if codes is None:
+            return None
+        return [ERROR_CODES.get(c, ERROR_UNKNOWN) for c in codes]
 
     @property
-    def status(self) -> str:
-        """Lỗi đầu tiên (theo mã nhỏ nhất) hoặc 'normal'."""
+    def status(self) -> str | None:
+        """Lỗi đầu tiên (theo mã nhỏ nhất), 'normal' nếu không lỗi, None nếu chưa biết."""
         errors = self.errors
+        if errors is None:
+            return None
         return errors[0] if errors else ERROR_NONE
 
 

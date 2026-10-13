@@ -85,7 +85,32 @@ def detail_payload(**overrides) -> dict:
     }
 
 
-def houses_payload() -> dict:
+def _house_device(serial: str, device_id: int) -> dict:
+    return {
+        "id": device_id,
+        "seriNumber": serial,
+        "status": 1,
+        "firmwareVersion": "2006",
+        "aliaName": None,
+        "models": copy.deepcopy(MODELS),
+        "Devices_Type": {"id": 19, "name": "Aiotec_41"},
+        "properties": [
+            _p("iro_errs", "1"),
+            _p("iro_tds", "3"),
+            _p("iro_hsd", "8640,8640,8640,25920,8640"),
+            _p("iro_lTime", "0,0,0,15144,0"),
+            _p("iro_rtt", "1200,1200,1200,3600,1200"),
+            _p("iro_rtr", "1026,1026,1026,3426,1026"),
+            _p("iro_nuocIn", "1"),
+            _p("iro_bom", "0"),
+            _p("rssi", "-46"),
+        ],
+    }
+
+
+def houses_payload(*serials: str) -> dict:
+    if not serials:
+        serials = (SERIAL,)
     return {
         "code": 200,
         "message": "OK",
@@ -96,32 +121,14 @@ def houses_payload() -> dict:
                 {
                     "id": 200001,
                     "name": "Nhà Của Tôi",
-                    "devicesCount": 1,
+                    "devicesCount": len(serials),
                     "rooms": [
                         {
                             "id": 300001,
                             "name": "Thiết bị chưa gán phòng",
                             "devices": [
-                                {
-                                    "id": 100001,
-                                    "seriNumber": SERIAL,
-                                    "status": 1,
-                                    "firmwareVersion": "2006",
-                                    "aliaName": None,
-                                    "models": copy.deepcopy(MODELS),
-                                    "Devices_Type": {"id": 19, "name": "Aiotec_41"},
-                                    "properties": [
-                                        _p("iro_errs", "1"),
-                                        _p("iro_tds", "3"),
-                                        _p("iro_hsd", "8640,8640,8640,25920,8640"),
-                                        _p("iro_lTime", "0,0,0,15144,0"),
-                                        _p("iro_rtt", "1200,1200,1200,3600,1200"),
-                                        _p("iro_rtr", "1026,1026,1026,3426,1026"),
-                                        _p("iro_nuocIn", "1"),
-                                        _p("iro_bom", "0"),
-                                        _p("rssi", "-46"),
-                                    ],
-                                }
+                                _house_device(serial, 100001 + i)
+                                for i, serial in enumerate(serials)
                             ],
                         }
                     ],

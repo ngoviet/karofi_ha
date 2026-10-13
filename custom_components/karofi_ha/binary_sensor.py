@@ -51,13 +51,13 @@ BINARY_SENSORS: tuple[KarofiBinaryDescription, ...] = (
         key="problem",
         translation_key="problem",
         device_class=BinarySensorDeviceClass.PROBLEM,
-        value_fn=lambda d: bool(d.error_codes),
+        value_fn=lambda d: None if d.error_codes is None else bool(d.error_codes),
     ),
     KarofiBinaryDescription(
         key="leak",
         translation_key="leak",
         device_class=BinarySensorDeviceClass.MOISTURE,
-        value_fn=lambda d: 5 in d.error_codes,
+        value_fn=lambda d: None if d.error_codes is None else 5 in d.error_codes,
     ),
 )
 
