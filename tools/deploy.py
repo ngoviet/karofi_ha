@@ -35,7 +35,8 @@ def run(cmd: str) -> str:
 
 
 files = [p for p in SRC.rglob("*") if p.is_file() and "__pycache__" not in p.parts]
-run(f"sudo mkdir -p {DEST}/translations && sudo rm -rf {DEST}/__pycache__")
+dirs = sorted({f"{DEST}/{p.relative_to(SRC).parent.as_posix()}".rstrip("/.") for p in files})
+run(f"sudo mkdir -p {' '.join(dirs)} && sudo rm -rf {DEST}/__pycache__")
 for p in files:
     rel = p.relative_to(SRC).as_posix()
     b64 = base64.b64encode(p.read_bytes()).decode()
