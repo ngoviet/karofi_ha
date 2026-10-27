@@ -1,54 +1,94 @@
-# Karofi 365 cho Home Assistant
+# Karofi 365 for Home Assistant
 
-Đọc máy lọc nước **Karofi** (có Wi-Fi, quản lý bằng app **Karofi 365**) vào Home Assistant qua
-cloud `365api.karofi.com`. Giao thức được reverse-engineer từ app Karofi 365 v2.2.98 —
-chi tiết ở [docs/api-notes.md](docs/api-notes.md).
+<!-- readme-axi type=ha -->
 
-> **Phase 1 — chỉ đọc.** Không điều khiển, không reset lõi.
-> Đã kiểm tra trên **KAQ-U98** (loại `Aiotec_41`). Các máy khác dùng bộ property `iro_*`
-> cũng chạy; dòng K365 cũ (`mlt_*`) chưa hỗ trợ.
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://hacs.xyz/docs/faq/custom_repositories/)
+[![Validate](https://github.com/ngoviet/karofi_ha/actions/workflows/validate.yml/badge.svg)](https://github.com/ngoviet/karofi_ha/actions/workflows/validate.yml)
+[![Test](https://github.com/ngoviet/karofi_ha/actions/workflows/test.yml/badge.svg)](https://github.com/ngoviet/karofi_ha/actions/workflows/test.yml)
+[![License: MIT](https://img.shields.io/github/license/ngoviet/karofi_ha)](LICENSE)
 
-## Cài đặt
+**English** · [Tiếng Việt](README.vi.md)
 
-1. HACS → *Custom repositories* → thêm repo này (loại *Integration*) → cài **Karofi 365**,
-   hoặc chép `custom_components/karofi_ha` vào `/config/custom_components/`.
-2. Khởi động lại Home Assistant.
-3. *Cài đặt → Thiết bị & Dịch vụ → Thêm tích hợp → Karofi 365* → nhập số điện thoại + mật khẩu
-   app Karofi 365.
+Brings a **Karofi water purifier** (Wi-Fi models managed with the **Karofi 365** app) into
+Home Assistant through the `365api.karofi.com` cloud: TDS and water quality, machine status
+and alerts, and the remaining life of every filter. The protocol was reverse-engineered from
+the Karofi 365 app v2.2.98 — details in [docs/api-notes.md](docs/api-notes.md).
 
-Tuỳ chọn: chu kỳ cập nhật (mặc định 60 s, 30–900 s).
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=ngoviet&repository=karofi_ha&category=integration)
 
-## Entity (mỗi máy lọc)
+> 🇻🇳 Built and maintained by one person in Việt Nam — if it saves you time, please
+> [support the project](#support-the-project).
 
-| Entity | Nguồn | Ghi chú |
+## Features
+
+- **Phase 1 — read-only.** No control, no filter reset.
+- **Water** — TDS (ppm) and a water-quality rating with the same thresholds as the app.
+- **Status and alerts** — machine status from the error codes, a general alert, water leak,
+  inlet water, pump, tank full and flush valve.
+- **Filters** — days remaining, percentage and a "replace" alert for every filter, using the
+  app's warning thresholds.
+- **Diagnostics** — connection and Wi-Fi signal.
+- **No extra dependencies**, UI setup (config flow), re-authentication, options (update
+  interval), diagnostics, English and Vietnamese UI.
+
+## Supported devices
+
+Tested on **KAQ-U98** (type `Aiotec_41`). Other purifiers that use the `iro_*` property set
+work too; the older K365 line (`mlt_*`) is not supported yet. Requires **Home Assistant
+2026.9** or newer.
+
+## Installation
+
+1. HACS → *Custom repositories* → add this repository (type *Integration*) → install
+   **Karofi 365**, or copy `custom_components/karofi_ha` into `/config/custom_components/`.
+2. Restart Home Assistant.
+
+## Configuration
+
+*Settings → Devices & Services → Add Integration → Karofi 365* → enter the phone number and
+password of your Karofi 365 app account.
+
+Options: update interval (default 60 s, 30–900 s).
+
+## Entities
+
+One set per purifier:
+
+| Entity | Source | Notes |
 |---|---|---|
 | TDS (ppm) | `iro_tds` | |
-| Chất lượng nước | TDS | Tốt (< 50) · Kiểm tra lại nguồn nước (< 100) · Kém an toàn — đúng ngưỡng của app |
-| Trạng thái | `iro_errs` | Hoạt động ổn định / Bơm chạy quá 5 tiếng / Nước cấp yếu / Cạn bình chứa / Không có nước đầu vào / Rò rỉ / TDS cao. Attribute `error_codes` |
-| Cảnh báo (problem) | `iro_errs` | Bật khi có bất kỳ lỗi nào |
-| Rò rỉ nước (moisture) | lỗi 5 | |
-| Có nước đầu vào | `iro_nuocIn` | |
-| Bơm (running) | `iro_bom` | |
-| Bình chứa đầy · Van xả | `iro_ketn` · `iro_vx` | `unknown` nếu máy không báo (KAQ-U98 không báo) |
-| Lõi N còn lại (ngày) | `iro_lTime / 24` | Attribute: tên lõi, tổng ngày, giờ bơm còn/tổng |
-| Lõi N % | min(% theo lịch, % theo giờ bơm) | |
-| Lõi N cần thay (problem) | còn < 15 ngày **hoặc** < 50 giờ bơm | Đúng ngưỡng cảnh báo của app |
-| Kết nối · Tín hiệu Wi-Fi | `status`, `rssi` | Chẩn đoán |
+| Water quality | TDS | Good (< 50) · Check water source (< 100) · Unsafe — same thresholds as the app |
+| Status | `iro_errs` | Normal / Pump ran over 5 hours / Weak inlet water / Tank empty / No inlet water / Water leak / High TDS. Attribute `error_codes` |
+| Alert (problem) | `iro_errs` | On when there is any error |
+| Water leak (moisture) | error 5 | |
+| Inlet water | `iro_nuocIn` | |
+| Pump (running) | `iro_bom` | |
+| Tank full · Flush valve | `iro_ketn` · `iro_vx` | `unknown` if the machine does not report them (KAQ-U98 does not) |
+| Filter N remaining (days) | `iro_lTime / 24` | Attributes: filter name, total days, pump hours left/total |
+| Filter N % | min(% by schedule, % by pump hours) | |
+| Filter N replace (problem) | < 15 days left **or** < 50 pump hours left | Same warning thresholds as the app |
+| Connection · Wi-Fi signal | `status`, `rssi` | Diagnostic |
 
-> `iro_errs` rỗng hoặc thiếu = máy chưa báo → Trạng thái, Cảnh báo và Rò rỉ là `unknown`
-> (không phải "Hoạt động ổn định"/tắt). Mảng rỗng thật (`[]`) hoặc toàn `"0"` vẫn là bình thường.
+## Troubleshooting
 
-## Phát triển
+- **Cloud only** — needs internet access to `365api.karofi.com`; there is no local control.
+- **Status, Alert and Water leak are `unknown`** — `iro_errs` empty or missing means the
+  machine has not reported yet, so these entities are `unknown` (not "Normal" / off). A real
+  empty array (`[]`) or all `"0"` is still normal.
+- **Tank full / Flush valve are `unknown`** — the machine does not report them (KAQ-U98 does
+  not).
+- When reporting an issue, attach the integration's **diagnostics** (*Devices & Services →
+  Karofi 365 → ⋮ → Download diagnostics*).
+
+## Development
 
 ```bash
 pip install -r requirements_test.txt
 pytest
 ```
 
-Deploy thẳng lên HA qua SSH: chép `.env.example` → `.env`, điền `HA_HOST`/`HA_USER`/`HA_PASS`,
-rồi `python tools/deploy.py` và restart HA.
-
----
+Deploy straight to HA over SSH: copy `.env.example` → `.env`, fill in `HA_HOST`/`HA_USER`/`HA_PASS`,
+then run `python tools/deploy.py` and restart HA.
 
 <!-- support:start -->
 ## Support the project
@@ -67,5 +107,10 @@ rồi `python tools/deploy.py` và restart HA.
   <img src="https://raw.githubusercontent.com/ngoviet/.github/main/assets/support/vietqr-card.svg" width="300" alt="VietQR — MB Bank — NGO DUC VIET — 911051212">
 </p>
 
-<p align="center"><sub>🇻🇳 VietQR: quét bằng app ngân hàng bất kỳ, nội dung <code>Ung ho karofi_ha</code>. Cảm ơn bạn! · Thank you for keeping this project alive.</sub></p>
+<p align="center"><sub>🇻🇳 VietQR: scan with any Vietnamese banking app, transfer note <code>Ung ho karofi_ha</code>. Thank you for keeping this project alive!</sub></p>
+<p align="center"><sub>Crypto (BEP20 network): <code>0x57f07d44fb581cddc028a0c67d63a8cc05aa6caa</code> · USDT · USDC · BNB · ETH · BTC</sub></p>
 <!-- support:end -->
+
+## License
+
+[MIT](LICENSE) © Ngô Đức Việt. Not affiliated with Karofi.
